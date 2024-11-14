@@ -105,7 +105,7 @@ def plot_line_growth(data):
     return fig    
     
 
-# Fies Visualization
+# FIES Visualization
 
 def plot_expenditure_breakdown(data):
     
@@ -113,29 +113,77 @@ def plot_expenditure_breakdown(data):
     fig = px.treemap(data, path=['Expenditure Category'], values='Amount')
 
     fig.update_traces(textfont=dict(color='black', size=20))
-    
-    # Update layout
-    # fig.update_layout(
-    #     width=800,
-    #     height=400,
-    #     margin=dict(t=30, l=10, r=10, b=10),
-    #     showlegend=False,
-    # )
-     
-
+         
     return fig
-    
+
+#  FIES
 def plot_philippine_map(data, geojson_data):
+    def format_number(num):
+        if num >= 1_000_000_000:
+            return f"{num / 1_000_000_000:.2f}B"
+        elif num >= 1_000_000:
+            return f"{num / 1_000_000:.2f}M"
+        else:
+            return f"{num:.2f}"
+    data['Formatted Income'] = data['Total Household Income'].apply(format_number)
+  
     fig = px.choropleth_mapbox(data,
                               geojson=geojson_data,
                               locations='Region',
                               featureidkey="properties.name",
                               color='Total Household Income',
-                              color_continuous_scale="Viridis",
+                              color_continuous_scale="Reds",                              
                               mapbox_style="carto-positron",
-                              zoom=5,
+                              zoom=4.5,
                               center={"lat": 12.8797, "lon": 121.7740},
                               opacity=0.5)
+    
+    # Update hover template to show the formatted values
+    fig.update_traces(hovertemplate="<b>%{location}</b><br>Total Household Income: %{customdata[0]}<extra></extra>")
 
-    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    # Pass the formatted column as customdata to the hovertemplate
+    fig.update_traces(customdata=data[['Formatted Income']])
+    
+    fig.update_layout(height=700, margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
+
+def fies_barchart(data):
+    
+    fig = px.bar(
+        data,
+        x='Total Household Income',
+        y='Region',
+        orientation='h',
+        title='Top Regions',
+        color_discrete_sequence=['#FF8080']    
+    )
+    
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=30, b=20),
+        height=400,  # Adjust the height as needed
+        xaxis_title="Total Household Income ₱",
+        yaxis_title="",
+        yaxis={'categoryorder': 'total ascending'}
+
+    )
+    
+    return fig
+
+def fies_piechart(data):
+    income_sources = data['Main Source of Income'].value_counts().to_dict()
+
+    fig = px.pie(
+        values=list(income_sources.values()),
+        names=list(income_sources.keys()),
+        title="Source of Income",
+        color_discrete_sequence=['#FFD0D0', '#FFC0C0', '#FFAFAF']
+    )
+    
+    fig.update_traces(textposition='inside', textinfo='percent+label')
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(t=40, b=0, l=0, r=0),
+        height=300  # Adjust the height as needed
+    )
+    return fig
+    

@@ -52,7 +52,29 @@ with col5:
     household_head_indicator = st.radio("Household Head Job or Business", options=["All", "No Job/Business", "With Job/Business"])
     
 st.subheader('FIES Expenditure Breakdown')
-
 expenditure = data_loader.load_expenditure_data()
 fig1 = visualization.plot_expenditure_breakdown(expenditure)
 st.plotly_chart(fig1)
+
+# Mapbox and Pie Chart, Bar Chart (Top Regions)
+
+st.subheader("Source of Income and Top Regions")
+col1, col2 = st.columns(2)
+
+
+# Map Plotting
+with col1: 
+    ph_regions_geojson = data_loader.load_geodata()
+    total_inc = data_loader.get_totalinc()
+    fig2 = visualization.plot_philippine_map(total_inc,ph_regions_geojson)
+    st.plotly_chart(fig2)
+
+with col2: 
+    # Pie Chart
+    fies_data = data_loader.load_original_fies_data()
+    fig3 = visualization.fies_piechart(fies_data)
+    st.plotly_chart(fig3 , use_container_width=True)
+    # Bar Chart
+    fig4 = visualization.fies_barchart(fies_data)
+    st.plotly_chart(fig4, use_container_width=True)
+

@@ -126,6 +126,34 @@ def load_FIES_Data():
     
     return df
 
+def load_original_fies_data(): 
+    
+    df = pd.read_csv('FIES/Family Income and Expenditure.csv')
+    
+    region_name_mapping = {
+        'CAR': 'Cordillera Administrative Region',
+        'Caraga': 'Caraga',
+        'VI - Western Visayas': 'Western Visayas',
+        'V - Bicol Region': 'Bicol',
+        ' ARMM': 'Autonomous Region in Muslim Mindanao',
+        'III - Central Luzon': 'Central Luzon',
+        'II - Cagayan Valley': 'Cagayan Valley',
+        'IVA - CALABARZON': 'Calabarzon',
+        'VII - Central Visayas': 'Central Visayas',
+        'X - Northern Mindanao': 'Northern Mindanao',
+        'XI - Davao Region': 'Davao',
+        'VIII - Eastern Visayas': 'Eastern Visayas',
+        'I - Ilocos Region': 'Ilocos',
+        'NCR': 'National Capital Region',
+        'IVB - MIMAROPA': 'Mimaropa',
+        'XII - SOCCSKSARGEN': 'Soccsksargen',
+        'IX - Zasmboanga Peninsula': 'Zamboanga Peninsula'
+    }
+
+    # Apply the mapping to the Region column
+    df['Region'] = df['Region'].replace(region_name_mapping)
+
+    return df
 # Load Average Values
 def load_average_values():
     
@@ -142,31 +170,9 @@ def load_average_values():
     )
     
 # FIES Breakdown 
-
 def load_expenditure_data(): 
     
-    df = pd.read_csv('FIES/Family Income and Expenditure.csv')
-    
-    # expenditure = {
-    #     'Total Food': df['Total Food Expenditure'].sum(),
-    #     'Housing and water': df['Housing and water Expenditure'].sum(),
-    #     'Total Rice': df['Total Rice Expenditure'].sum(),
-    #     'Bread and Cereals': df['Bread and Cereals Expenditure'].sum(),
-    #     'Restaurant and hotels': df['Restaurant and hotels Expenditure'].sum(),
-    #     'Crop Farming and Gardening': df['Crop Farming and Gardening expenses'].sum(),
-    #     'Miscellaneous Goods and Services': df['Miscellaneous Goods and Services Expenditure'].sum(),
-    #     'Meat': df['Meat Expenditure'].sum(),
-    #     'Total Fish and marine products': df['Total Fish and  marine products Expenditure'].sum(),
-    #     'Transportation': df['Transportation Expenditure'].sum(),
-    #     'Education': df['Education Expenditure'].sum(),
-    #     'Medical Care': df['Medical Care Expenditure'].sum(),
-    #     'Fruit Expenditure': df['Fruit Expenditure'].sum(),
-    #     'Vegetables Expenditure': df['Vegetables Expenditure'].sum(),
-    #     'Tobacco Expenditure': df['Tobacco Expenditure'].sum(),
-    #     'Alcoholic Beverages Expenditure': df['Alcoholic Beverages Expenditure'].sum(),
-    #     'Total Special Occasion Expenditure': df['Special Occasions Expenditure'].sum(),
-    #     'Total Communication Expenditure': df['Communication Expenditure'].sum()
-    #     }
+    df = load_original_fies_data()
     
     df_expenditure = df[['Total Food Expenditure','Total Rice Expenditure', 'Meat Expenditure' , 'Bread and Cereals Expenditure', 'Fruit Expenditure','Vegetables Expenditure',  'Restaurant and hotels Expenditure','Alcoholic Beverages Expenditure', 'Tobacco Expenditure',  'Clothing, Footwear and Other Wear Expenditure',  'Housing and water Expenditure',   'Medical Care Expenditure', 'Communication Expenditure', 'Education Expenditure',  'Miscellaneous Goods and Services Expenditure', 'Crop Farming and Gardening expenses', 'Total Fish and  marine products Expenditure','Transportation Expenditure', 'Special Occasions Expenditure']]
 
@@ -175,3 +181,7 @@ def load_expenditure_data():
 
     return df_melted
 
+def get_totalinc(): 
+    df = load_original_fies_data()
+    df_summary = df.groupby('Region')['Total Household Income'].sum().reset_index()
+    return df_summary
