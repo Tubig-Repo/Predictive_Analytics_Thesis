@@ -4,6 +4,11 @@ import pandas as pd
 import re
 from types import SimpleNamespace
 
+
+def load_geodata():
+    with open('GeoJSON/PHRegions.json', 'r') as f:
+        geo_data = json.load(f)
+        return geo_data
 # Will handle the philippines geographic data structure
 def load_geojson(option_level):
         if option_level == 'Region':
@@ -121,7 +126,7 @@ def load_FIES_Data():
     
     return df
 
-
+# Load Average Values
 def load_average_values():
     
     df = load_FIES_Data()
@@ -129,8 +134,44 @@ def load_average_values():
     avg_household_age = df['Household Head Age'].mean()
     avg_household_inc = df['Total Household Income'].mean()
     avg_household_working = df['Total number of family members employed'].mean()
+    
     return SimpleNamespace(
         avg_age=avg_household_age,
         avg_household_inc=avg_household_inc,
         avg_working_mem=avg_household_working
     )
+    
+# FIES Breakdown 
+
+def load_expenditure_data(): 
+    
+    df = pd.read_csv('FIES/Family Income and Expenditure.csv')
+    
+    # expenditure = {
+    #     'Total Food': df['Total Food Expenditure'].sum(),
+    #     'Housing and water': df['Housing and water Expenditure'].sum(),
+    #     'Total Rice': df['Total Rice Expenditure'].sum(),
+    #     'Bread and Cereals': df['Bread and Cereals Expenditure'].sum(),
+    #     'Restaurant and hotels': df['Restaurant and hotels Expenditure'].sum(),
+    #     'Crop Farming and Gardening': df['Crop Farming and Gardening expenses'].sum(),
+    #     'Miscellaneous Goods and Services': df['Miscellaneous Goods and Services Expenditure'].sum(),
+    #     'Meat': df['Meat Expenditure'].sum(),
+    #     'Total Fish and marine products': df['Total Fish and  marine products Expenditure'].sum(),
+    #     'Transportation': df['Transportation Expenditure'].sum(),
+    #     'Education': df['Education Expenditure'].sum(),
+    #     'Medical Care': df['Medical Care Expenditure'].sum(),
+    #     'Fruit Expenditure': df['Fruit Expenditure'].sum(),
+    #     'Vegetables Expenditure': df['Vegetables Expenditure'].sum(),
+    #     'Tobacco Expenditure': df['Tobacco Expenditure'].sum(),
+    #     'Alcoholic Beverages Expenditure': df['Alcoholic Beverages Expenditure'].sum(),
+    #     'Total Special Occasion Expenditure': df['Special Occasions Expenditure'].sum(),
+    #     'Total Communication Expenditure': df['Communication Expenditure'].sum()
+    #     }
+    
+    df_expenditure = df[['Total Food Expenditure','Total Rice Expenditure', 'Meat Expenditure' , 'Bread and Cereals Expenditure', 'Fruit Expenditure','Vegetables Expenditure',  'Restaurant and hotels Expenditure','Alcoholic Beverages Expenditure', 'Tobacco Expenditure',  'Clothing, Footwear and Other Wear Expenditure',  'Housing and water Expenditure',   'Medical Care Expenditure', 'Communication Expenditure', 'Education Expenditure',  'Miscellaneous Goods and Services Expenditure', 'Crop Farming and Gardening expenses', 'Total Fish and  marine products Expenditure','Transportation Expenditure', 'Special Occasions Expenditure']]
+
+    # Melt the data: converting each expenditure category to a single row
+    df_melted = df_expenditure.melt(var_name='Expenditure Category', value_name='Amount')
+
+    return df_melted
+

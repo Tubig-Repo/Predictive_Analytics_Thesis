@@ -51,3 +51,8 @@ with col4:
 with col5:
     household_head_indicator = st.radio("Household Head Job or Business", options=["All", "No Job/Business", "With Job/Business"])
     
+st.subheader('FIES Expenditure Breakdown')
+
+expenditure = data_loader.load_expenditure_data()
+fig1 = visualization.plot_expenditure_breakdown(expenditure)
+st.plotly_chart(fig1)

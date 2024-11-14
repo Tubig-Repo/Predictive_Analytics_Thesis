@@ -104,4 +104,38 @@ def plot_line_growth(data):
     # Show the plot
     return fig    
     
+
+# Fies Visualization
+
+def plot_expenditure_breakdown(data):
     
+    # Create the treemap using the melted DataFrame
+    fig = px.treemap(data, path=['Expenditure Category'], values='Amount')
+
+    fig.update_traces(textfont=dict(color='black', size=20))
+    
+    # Update layout
+    # fig.update_layout(
+    #     width=800,
+    #     height=400,
+    #     margin=dict(t=30, l=10, r=10, b=10),
+    #     showlegend=False,
+    # )
+     
+
+    return fig
+    
+def plot_philippine_map(data, geojson_data):
+    fig = px.choropleth_mapbox(data,
+                              geojson=geojson_data,
+                              locations='Region',
+                              featureidkey="properties.name",
+                              color='Total Household Income',
+                              color_continuous_scale="Viridis",
+                              mapbox_style="carto-positron",
+                              zoom=5,
+                              center={"lat": 12.8797, "lon": 121.7740},
+                              opacity=0.5)
+
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    return fig
