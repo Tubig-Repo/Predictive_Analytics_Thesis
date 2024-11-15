@@ -11,6 +11,7 @@ import data_loader
 import visualization
 
 
+
 st.set_page_config(layout="wide")
 st.title("Population Density in the Philippines")
 
