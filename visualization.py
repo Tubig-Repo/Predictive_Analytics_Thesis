@@ -30,7 +30,27 @@ def plot_map(data , geo_data):
     fig.update_layout( height=600,margin={"r": 0, "t": 0, "l": 0, "b": 0})
     
     return fig
+def ml_map(data, geo_data, cluster_select):
+    color_column = f"{cluster_select} Score"  # Example: "Low Wealth Score", "Moderate Wealth Score", "High Wealth Score"
 
+    # Moderate Wealth Score
+    fig = px.choropleth_mapbox(
+        data,
+        geojson=geo_data,
+        locations="Standardized Region Name",
+        featureidkey="properties.name",  # Adjust this to match the property name in the GeoJSON file
+        color=color_column,
+        color_continuous_scale="Reds",
+        range_color=(0, 1),
+        mapbox_style="carto-positron",
+        zoom=5,
+        center={"lat": 12.8797, "lon": 121.7740},
+        opacity=0.6,
+        labels={'Moderate Wealth Score': 'Moderate Wealth Score'},
+        title=f"{cluster_select} Cluster Visualization",
+    )
+    fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0})
+    return fig
 #Create the Bar Chart 
 def plot_bar(data, selected_year): 
     
@@ -186,4 +206,6 @@ def fies_piechart(data):
         height=300  # Adjust the height as needed
     )
     return fig
+
+
     

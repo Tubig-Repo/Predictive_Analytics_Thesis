@@ -185,3 +185,11 @@ def get_totalinc():
     df = load_original_fies_data()
     df_summary = df.groupby('Region')['Total Household Income'].sum().reset_index()
     return df_summary
+
+
+def get_ml_output(): 
+    
+    df = pd.read_csv('ModelOutput/Standardized FIES Dataset.csv')
+    
+    return df
+    
