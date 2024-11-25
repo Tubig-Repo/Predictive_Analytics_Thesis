@@ -207,5 +207,22 @@ def fies_piechart(data):
     )
     return fig
 
-
+def create_choropleth(df, color_column, geo_data, selected_theme):
+    fig = px.choropleth_mapbox(
+        df,
+        geojson=geo_data,
+        locations="Region",
+        featureidkey="properties.name",
+        color=color_column,
+        color_continuous_scale=selected_theme,
+        mapbox_style="carto-positron",
+        zoom=5,
+        center={"lat": 12.8797, "lon": 121.7740},
+        opacity=0.6,
+        labels={'Actual_Meat_Expenditure': 'Actual Meat Expenditure (₱)',
+                'Business_Potential_Score': 'Business Potential Score'},
+        title=f"Regional {color_column.replace('_', ' ')}",
+    )
+    fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0},width=460, height=700)
+    return fig
     

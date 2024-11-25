@@ -13,7 +13,7 @@ import visualization
 
 
 st.set_page_config(layout="wide")
-st.title("Population Density in the Philippines")
+st.title("FIES Data Analytics")
 
 get_avg_values = data_loader.load_average_values()
 # FIES Average Values
