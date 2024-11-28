@@ -5,6 +5,7 @@ import sys
 import os
 import numpy as np
 import altair as alt
+import json
 sys.path.append(os.path.abspath(".."))
 
 import data_loader
@@ -95,7 +96,7 @@ st.set_page_config(
 # Page configuration
 
 
-st.title("Business Score Prediction by Region in the Philippines")
+st.title("Socioeconomic Segmentation Analysis by Region in the Philippines")
 
 
 
@@ -129,6 +130,7 @@ st.markdown("""
     justify-content: center;
     align-items: center;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -156,10 +158,12 @@ with st.sidebar:
     unique_clusters = df['Clusters'].unique()
     selected_cluster = st.selectbox('Select Cluster', unique_clusters)
     clustered_data = df[df['Clusters'] == selected_cluster]
-
+with open('GeoJSON/PHRegions.json', 'r') as f:
+        geo_data = json.load(f)
+            
 #######################
 # Dashboard Main Panel
-col = st.columns((1.5, 2, 1))
+col = st.columns((1.5, 2, 1.5))
 
 # Cluster Profile Summary
 with col[0]:
@@ -214,11 +218,18 @@ with col[0]:
 
     # Display the cluster counts in a table
     st.markdown(f"### Cluster Distribution for Region: {map_metric}")
-    st.write("The table below shows the count of regions/families in each cluster based on the selected region.")
 
     st.table(cluster_counts)
+with col[1]: 
 
-with col[1]:
+    choropleth_fig = visualization.socioeconomic_choropleth(
+        df=df,
+        geo_data=geo_data,
+        selected_cluster=selected_cluster,
+        selected_theme=selected_color_theme
+    )
+    st.plotly_chart(choropleth_fig, use_container_width=True)
+with col[2]:
     # Filter the data by the selected region
     region_data = df[df['Standardized Region Name'] == map_metric]
 
@@ -229,23 +240,23 @@ with col[1]:
 
     # Plot the cluster distribution using Altair
     cluster_hist = alt.Chart(cluster_counts).mark_bar().encode(
-        x=alt.X('Cluster:N', title='Cluster'),
-        y=alt.Y('Count:Q', title='Number of Families/Regions'),
-        color=alt.Color('Cluster:N', scale=alt.Scale(scheme=selected_color_theme))
+        y=alt.Y('Cluster:N', title='Cluster'),
+        x=alt.X('Count:Q', title='Number of Families/Regions'),
+        color=alt.Color('Cluster:N', scale=alt.Scale(scheme=selected_color_theme), legend=alt.Legend(orient='bottom'))
     ).properties(
-        height=400,
-        width=600,
+        height=500,
+        width=900,
         title=f'Cluster Distribution in {map_metric}'
     )
+    
     st.altair_chart(cluster_hist, use_container_width=True)
 
     with st.expander('About', expanded=True):
         st.write('''
-        - 🥩 **Expenditure Analysis**: Shows regions with highest and lowest meat expenditure
-        - 📊 **Prediction Accuracy**: Displays how close the predicted values are to actual values
-        - 💰 **Business Potential**: Ranks regions based on their business potential score
-        - 📈 **Regional Overview**: Compares predicted vs actual expenditure and shows relationship with household income
-        ''')
-
+        - 🔍 **Cluster Segmentation**: Divides regions into distinct clusters based on socioeconomic factors
+        - 📊 **Cluster Distribution**: Visualizes the number of regions or families in each cluster
+        - 🌍 **Wealth Score Mapping**: Displays how wealth scores (Low, Moderate, High) are distributed across regions in the Philippines using a choropleth map.
+        - 📋 **Cluster Profiles**: Provides detailed profiles for each cluster, showcasing key socioeconomic factors, including income, expenditures, and household characteristics that define each cluster's unique profile.
+         ''')
 
 

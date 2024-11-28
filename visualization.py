@@ -230,5 +230,39 @@ def create_choropleth(df, color_column, geo_data, selected_theme):
     
     return fig
 
-def segementation_choropleth(): 
-    return ''
+def socioeconomic_choropleth(df, geo_data, selected_cluster, selected_theme): 
+    # Determine the wealth score column based on the selected cluster
+    wealth_score_column = f"{selected_cluster} Score"
+
+    # Create the choropleth map
+    fig = px.choropleth_mapbox(
+        df,
+        geojson=geo_data,
+        locations="Standardized Region Name",
+        featureidkey="properties.name",  # Matches GeoJSON property for regions
+        color=wealth_score_column,  # Use the selected wealth score
+        color_continuous_scale=selected_theme,
+        range_color=(0, 1),  # Assuming wealth scores are normalized between 0 and 1
+        mapbox_style="carto-positron",
+        zoom=5,
+        center={"lat": 12.8797, "lon": 121.7740},
+        opacity=0.6,
+        labels={wealth_score_column: f"{selected_cluster} Score"},
+        title=f"{selected_cluster} Score by Region"
+    )
+
+    # Add hover labels with region and wealth score
+    fig.update_traces(
+        marker_line_width=1,
+        marker_line_color="white"
+    )
+
+    # Layout adjustments
+    fig.update_layout(
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        width=460, 
+        height=700
+    )
+    
+    return fig
+

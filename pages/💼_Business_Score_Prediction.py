@@ -16,8 +16,8 @@ import visualization
 #######################
 # Page configuration
 st.set_page_config(
-    page_title="Regional Meat Expenditure Dashboard",
-    page_icon="🥩",
+    page_title="Regional Expenditure Dashboard",
+    page_icon="💰",
     layout="wide",
     initial_sidebar_state="expanded")
 
@@ -61,10 +61,38 @@ st.markdown("""
 #######################
 # Load data
 
-df = pd.read_csv('ModelOutput/region_scores.csv')
+df = pd.read_csv('ModelOutput/meat_scores.csv')
 
 #######################
 # Sidebar
+def get_map_metric_options(dataset):
+    """
+    Dynamically generate map metric options based on dataset
+    """
+    metric_mappings = {
+        'Meat Processing/Distribution': [
+            'Actual_Meat_Expenditure', 
+            'Business_Potential_Score'
+        ],
+        'Restaurant Business': [
+            'Actual_Restaurant_Expenditure', 
+            'Business_Potential_Score'
+        ],
+        'Home Improvement/Construction': [
+            'Actual_Construction_Expenditure', 
+            'Business_Potential_Score'
+        ],
+        'Bar/Clubs Business': [
+            'Actual_Bar_Expenditure', 
+            'Business_Potential_Score'
+        ],
+        'Medical Care Expenditure': [
+            'Actual_Medical_Expenditure', 
+            'Business_Potential_Score'
+        ]
+    }
+    return metric_mappings.get(dataset, ['Business_Potential_Score'])
+
 with st.sidebar:
     type_expenditure = st.selectbox('Select Type of Family Expenditure', ())
     st.title('🥩 Regional Meat Expenditure Dashboard')
