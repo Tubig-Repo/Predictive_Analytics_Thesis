@@ -65,11 +65,11 @@ def get_map_metric_options(dataset):
             'Business_Potential_Score'
         ],
         'Home Improvement/Construction': [
-            'Actual_Construction_Expenditure', 
+            'Actual_Housing_Water_Expenditure', 
             'Business_Potential_Score'
         ],
         'Bar/Clubs Business': [
-            'Actual_Bar_Expenditure', 
+            'Average_Alcoholic_Beverages_Expenditure', 
             'Business_Potential_Score'
         ],
         'Medical Care Expenditure': [
@@ -82,18 +82,29 @@ def get_map_metric_options(dataset):
 # Sidebar for dataset selection
 with st.sidebar:
     dataset_options = [
-        'Meat Processing/Distribution',
-        'Restaurant Business',
-        'Home Improvement/Construction',
-        'Bar/Clubs Business',
-        'Medical Care Expenditure'
+        ('🥩', 'Meat Processing/Distribution'),
+        ('🍽️', 'Restaurant Business'),
+        ('🏠', 'Home Improvement/Construction'),
+        ('🍺', 'Bar/Clubs Business'),
+        ('🏥', 'Medical Care Expenditure'),
     ]
-    
-    selected_dataset = st.selectbox(
+
+    # Unpack icons and names
+    icons = [icon for icon, name in dataset_options]
+    names = [name for icon, name in dataset_options]
+
+    selected_dataset_index = st.selectbox(
         'Select Business/Expenditure Dataset', 
-        dataset_options
+        range(len(names)),
+        format_func=lambda x: f"{icons[x]} {names[x]}"
     )
     
+    # Get selected dataset and icon
+    selected_dataset = names[selected_dataset_index]
+    selected_icon = icons[selected_dataset_index]
+
+    # Dynamic title with icon
+    st.title(f'{selected_icon} {selected_dataset} Dashboard')
     color_theme_list = ['blues', 'cividis', 'greens', 'inferno', 'magma', 'plasma', 'reds', 'rainbow', 'turbo', 'viridis']
     selected_color_theme = st.selectbox('Select a color theme', color_theme_list)
     
@@ -111,9 +122,9 @@ def load_dataset(dataset):
         elif dataset == 'Restaurant Business':
             return pd.read_csv('ModelOutput/restaurant-scores.csv')
         elif dataset == 'Home Improvement/Construction':
-            return pd.read_csv('ModelOutput/construction_scores.csv')
+             return pd.read_csv('ModelOutput/construction-scores.csv')
         elif dataset == 'Bar/Clubs Business':
-            return pd.read_csv('ModelOutput/bar_scores.csv')
+            return pd.read_csv('ModelOutput/bar-scores.csv')
         elif dataset == 'Medical Care Expenditure':
             return pd.read_csv('ModelOutput/medical_scores.csv')
         else:
@@ -146,13 +157,13 @@ def get_expenditure_columns(dataset):
             'label': 'Restaurant Business Expenditure'
         },
         'Home Improvement/Construction': {
-            'actual_column': 'Actual_Construction_Expenditure',
-            'predicted_column': 'Predicted_Construction_Expenditure',
+            'actual_column': 'Actual_Housing_Water_Expenditure',
+            'predicted_column': 'Actual_Housing_Water_Expenditure',
             'label': 'Construction Expenditure'
         },
         'Bar/Clubs Business': {
-            'actual_column': 'Actual_Bar_Expenditure',
-            'predicted_column': 'Predicted_Bar_Expenditure',
+            'actual_column': 'Average_Alcoholic_Beverages_Expenditure',
+            'predicted_column': 'Predicted_Alcoholic_Beverages_Expenditure',
             'label': 'Bar/Clubs Expenditure'
         },
         'Medical Care Expenditure': {
@@ -228,11 +239,15 @@ def get_choropleth_metric(dataset, map_metric):
             'Business_Potential_Score': 'Business Potential'
         },
         'Bar/Clubs Business': {
-            'Actual_Bar_Expenditure': 'Bar/Clubs Expenditure',
+            'Average_Alcoholic_Beverages_Expenditure': 'Bar/Clubs Expenditure',
             'Business_Potential_Score': 'Business Potential'
         },
         'Medical Care Expenditure': {
             'Actual_Medical_Expenditure': 'Medical Expenditure',
+            'Business_Potential_Score': 'Business Potential'
+        },
+        'Home Improvement/Construction': {
+            'Actual_Housing_Water_Expenditure': 'Housing and Water Expenditure',
             'Business_Potential_Score': 'Business Potential'
         }
     }

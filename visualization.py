@@ -227,6 +227,17 @@ def create_choropleth(df, color_column, geo_data, selected_theme):
     
     fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0},width=460, height=700)
     
+    fig.update_traces(
+        marker_line_width=1,
+        marker_line_color="gray"
+    )
+
+    # Layout adjustments
+    fig.update_layout(
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        width=460, 
+        height=700
+    )
     
     return fig
 
