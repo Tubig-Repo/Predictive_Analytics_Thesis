@@ -22,7 +22,7 @@ st.title("Population Density in the Philippines")
 # Choose base on island
 option_island = st.selectbox(
       "Select By Island",
-      ("Luzon" , "Visayas", "Mindanao")
+      ("All","Luzon" , "Visayas", "Mindanao")
 )
 # Choose on wether to choose from Province/District, Regions or Municipalities
 # option_level = st.selectbox(

@@ -25,7 +25,34 @@ def load_geojson(option_level):
 
 def load_population(selected_year , option_level , option_island): 
     if option_level == 'Region':
-        if option_island == 'Luzon': 
+        if option_island == 'All':
+            # Read population data for all islands
+            luzon_population = pd.read_csv('Population Dataset/Luzon-Region-Population_Cleaned.csv')
+            visayas_population = pd.read_csv('Population Dataset/Visayas-Region-Population.csv')
+            mindanao_population = pd.read_csv('Population Dataset/Mindanao-Region-Population.csv')
+            
+            # Clean and preprocess each dataframe
+            # Luzon cleaning
+            luzon_df = pd.DataFrame(luzon_population)
+            luzon_df.loc[luzon_df['Name'] == 'MIMAROPA', 'Name'] = 'Mimaropa'
+            luzon_df[selected_year] = luzon_df[selected_year].str.replace(',', '').astype(float)
+            
+            # Visayas cleaning
+            visayas_population[selected_year] = visayas_population[selected_year].str.replace(',', '').astype(int)
+            
+            # Mindanao cleaning (assuming no special cleaning needed)
+            mindanao_df = pd.DataFrame(mindanao_population)
+            
+            # Combine all dataframes
+            combined_df = pd.concat([luzon_df, visayas_population, mindanao_df], ignore_index=True)
+            
+            # Prepare the return data
+            data = {
+                'location': combined_df['Name'].tolist(), 
+                "values": combined_df[selected_year].tolist()
+            }
+            return data 
+        elif option_island == 'Luzon': 
             population = pd.read_csv('Population Dataset/Luzon-Region-Population_Cleaned.csv')
             df = pd.DataFrame(population)
             # change location name of MIMAROPA to Mimaropa only 
@@ -38,7 +65,6 @@ def load_population(selected_year , option_level , option_island):
             # initializing the requested year of population and name of region 
             data = {'location': df['Name'].tolist(), "values": df[selected_year].tolist()}
             return data 
-        
         elif option_island == 'Visayas':    
             # Read Data
             population = pd.read_csv('Population Dataset/Visayas-Region-Population.csv')
