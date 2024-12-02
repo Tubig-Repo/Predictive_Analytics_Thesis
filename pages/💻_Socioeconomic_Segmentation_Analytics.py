@@ -171,7 +171,6 @@ with st.sidebar:
     factors = st.selectbox('Select Type of Factor', ('Socioeconomic Status and Wealth', 'Household Amenities'))
     data_year = st.selectbox('Select Data Year', ("2012", "2015", "2018"))
     df = select_year(factor=factors , year=data_year)
-    print(df)
     st.title('💸 Socioeconomic Segmentation Analysis base on FIES')
     
     color_theme_list = ['blues', 'cividis', 'greens', 'inferno', 'magma', 'plasma', 'reds', 'rainbow', 'turbo', 'viridis']
@@ -187,6 +186,7 @@ with st.sidebar:
     unique_clusters = df['Clusters'].unique()
     selected_cluster = st.selectbox('Select Cluster', unique_clusters)
     clustered_data = df[df['Clusters'] == selected_cluster]
+    
 with open('GeoJSON/PHRegions.json', 'r') as f:
         geo_data = json.load(f)
             
@@ -207,10 +207,15 @@ with col[0]:
             'Clothing, Footwear and Other Wear Expenditure', 'Number of Airconditioner'
         ]
 
-        wealth_categories = ['Low Wealth Score', 'Moderate Wealth Score', 'High Wealth Score']
+        cluster_categories = ['Low Wealth Score', 'Moderate Wealth Score', 'High Wealth Score']
+        category_column_mapping = {
+            'Low Wealth Score': 'Low Wealth',
+            'Moderate Wealth Score': 'Moderate Wealth',
+            'High Wealth Score': 'High Wealth'
+        }
     # Factor 2: Household Amenities and Needs
     elif factors == 'Household Amenities':
-        st.markdown(f'### Amenities Cluster Profile for Region: {map_metric}')
+        st.markdown(f'### Household Needs & Amenities Cluster Profile {map_metric}')
         
         # Columns for Household Amenities
         factored_columns = ['Total Number of Family members',
@@ -221,35 +226,50 @@ with col[0]:
 
         # Cluster categories for Household Amenities
         cluster_categories = ['Small Essential Households', 'Average-sized Households', 'Large Extended Households']
-
+        category_column_mapping = {
+            'Small Essential Households': 'Small Living Standard',
+            'Average-sized Households': 'Average Living Standard',
+            'Large Extended Households': 'Premium Living Standard'
+        }
+    else:
+        st.error("Invalid factor selected")
+        # Provide default values to prevent errors
+        factored_columns = []
+        cluster_categories = []
+        category_column_mapping = {}
+        cluster_key = 'Clusters'
 
     # Create a dictionary to store the average values for each cluster
     cluster_averages = {}# Loop through each cluster to calculate the average for 'Total Household Income'
-    # Create an empty dictionary to store average values for each wealth category
-    wealth_averages = {}
 
-    # Loop through each wealth category to calculate the average for each indicator
-    for wealth_category in wealth_categories:
-        # Filter the data for the current wealth category (where the wealth category score is 1)
-        cluster_data = df[df[wealth_category] == 1]
+    # Loop through each cluster category to calculate the average for indicators
+    for cluster_category in cluster_categories:
+        # Filter the data for the current cluster category
+        if factors == 'Socioeconomic Status and Wealth':
+            # For wealth status, use the score columns
+            cluster_data = df[df[cluster_category] == 1]
+        else:
+            # For amenities, filter by cluster name
+            cluster_data = df[df['Clusters'] == cluster_category]
         
-        # Calculate the average for the socioeconomic indicators (factored_columns)
+        # Calculate the average for the indicators
         average_values = cluster_data[factored_columns].mean()
         
-        # Store the result in the dictionary with the wealth category as key
-        wealth_averages[wealth_category] = average_values
+        # Store the result in the dictionary with the category as key
+        cluster_averages[cluster_category] = average_values
 
     # Convert the dictionary into a DataFrame for display
-    wealth_averages_df = pd.DataFrame(wealth_averages)
+    cluster_averages_df = pd.DataFrame(cluster_averages)
 
     # Reset the index so that the factored columns are rows
-    wealth_averages_df.reset_index(inplace=True)
+    cluster_averages_df.reset_index(inplace=True)
 
     # Rename the columns to reflect the correct names
-    wealth_averages_df.columns = ['Indicator', 'Low Wealth', 'Moderate Wealth', 'High Wealth']
+    cluster_column_names = ['Indicator'] + [category_column_mapping[col] for col in cluster_categories]
+    cluster_averages_df.columns = cluster_column_names
 
     # Display the DataFrame as a table
-    st.table(wealth_averages_df)
+    st.table(cluster_averages_df)
     
     ## Display Cluster Distribution
     
@@ -265,10 +285,10 @@ with col[0]:
 
     st.table(cluster_counts)
 with col[1]: 
-
     choropleth_fig = visualization.socioeconomic_choropleth(
         df=df,
         geo_data=geo_data,
+        factors=factors,
         selected_cluster=selected_cluster,
         selected_theme=selected_color_theme
     )
@@ -296,11 +316,19 @@ with col[2]:
     st.altair_chart(cluster_hist, use_container_width=True)
 
     with st.expander('About', expanded=True):
-        st.write('''
-        - 🔍 **Cluster Segmentation**: Divides regions into distinct clusters based on socioeconomic factors
-        - 📊 **Cluster Distribution**: Visualizes the number of regions or families in each cluster
-        - 🌍 **Wealth Score Mapping**: Displays how wealth scores (Low, Moderate, High) are distributed across regions in the Philippines using a choropleth map.
-        - 📋 **Cluster Profiles**: Provides detailed profiles for each cluster, showcasing key socioeconomic factors, including income, expenditures, and household characteristics that define each cluster's unique profile.
-         ''')
+        if factors == 'Socioeconomic Status and Wealth':
+            st.write('''
+            - 🔍 **Cluster Segmentation**: Divides regions into distinct clusters based on socioeconomic and wealth-related factors.
+            - 📊 **Cluster Distribution**: Visualizes the number of regions or families in each wealth cluster.
+            - 🌍 **Wealth Score Mapping**: Displays how wealth scores (Low, Moderate, High) are distributed across regions in the Philippines using a choropleth map.
+            - 📋 **Cluster Profiles**: Provides detailed profiles for each wealth cluster, showcasing key socioeconomic factors such as income, expenditures, and possessions.
+            ''')
+        elif factors == 'Household Amenities':
+            st.write('''
+            - 🔍 **Cluster Segmentation**: Categorizes regions into clusters based on household amenities and needs.
+            - 📊 **Cluster Distribution**: Visualizes the number of regions or families in each household amenity cluster.
+            - 🌍 **Amenities Score Mapping**: Displays the distribution of basic, moderate, and advanced household amenities across regions in the Philippines using a choropleth map.
+            - 📋 **Cluster Profiles**: Highlights key household characteristics such as family size, employment, and expenditures that define each cluster's profile.
+            ''')
 
 
