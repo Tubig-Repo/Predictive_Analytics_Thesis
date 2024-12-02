@@ -13,8 +13,6 @@ import visualization
 
 
 st.set_page_config(
-    page_title="Regional Meat Expenditure Dashboard",
-    page_icon="🥩",
     layout="wide",
     initial_sidebar_state="expanded")
 
@@ -137,13 +135,44 @@ st.markdown("""
 #######################
 # Load data
 
-df = pd.read_csv('ModelOutput/Socioeconomic-Segementation.csv')
 
 #######################
 # Sidebar
+
+def select_year(factor , year):
+    # Load the dataset based on the selected year and factor
+    if factor == 'Household Amenities':
+        if year == "2012":
+            df = pd.read_csv('ModelOutput/Household-Size-Basic-Needs-2012.csv')
+        elif year == "2015":
+            df = pd.read_csv('ModelOutput/Household-Amenities-2015.csv')
+        elif year == "2018":
+            df = pd.read_csv('ModelOutput/Household-Amenities-2018.csv')
+        else:
+            st.error("Invalid data year selected.")
+            df = None
+    elif factor == 'Socioeconomic Status and Wealth':
+        if year == "2012":
+            df = pd.read_csv('ModelOutput/Socioeconomic-Segmentation-2012.csv')
+        elif year == "2015":
+            df = pd.read_csv('ModelOutput/Socioeconomic-Segmentation-2015.csv')
+        elif year == "2018":
+            df = pd.read_csv('ModelOutput/Socioeconomic-Segmentation-2018.csv')
+        else:
+            st.error("Invalid data year selected.")
+            df = None
+    else:
+        st.error("Invalid factor selected.")
+        df = None
+    return df
+        
+        
 with st.sidebar:
-    factors = st.selectbox('Select Type of Factor', ())
-    st.title('🏠 Socioeconomic Segmentation Analysis base on FIES')
+    factors = st.selectbox('Select Type of Factor', ('Socioeconomic Status and Wealth', 'Household Amenities'))
+    data_year = st.selectbox('Select Data Year', ("2012", "2015", "2018"))
+    df = select_year(factor=factors , year=data_year)
+    print(df)
+    st.title('💸 Socioeconomic Segmentation Analysis base on FIES')
     
     color_theme_list = ['blues', 'cividis', 'greens', 'inferno', 'magma', 'plasma', 'reds', 'rainbow', 'turbo', 'viridis']
     selected_color_theme = st.selectbox('Select a color theme', color_theme_list)
@@ -167,16 +196,31 @@ col = st.columns((1.5, 2, 1.5))
 
 # Cluster Profile Summary
 with col[0]:
-    st.markdown(f'### Cluster Profile for Region: {map_metric}')
+    # Factor 1: Socioeconomic Status and Wealth
+    if factors == 'Socioeconomic Status and Wealth': 
+        st.markdown(f'### Cluster Profile for Region: {map_metric}')
 
-    factored_columns = [
-        'Total Household Income', 'Total Food Expenditure', 
-        'Transportation Expenditure', 'Number of Personal Computer', 
-        'Communication Expenditure', 'Miscellaneous Goods and Services Expenditure', 
-        'Clothing, Footwear and Other Wear Expenditure', 'Number of Airconditioner'
-    ]
+        factored_columns = [
+            'Total Household Income', 'Total Food Expenditure', 
+            'Transportation Expenditure', 'Number of Personal Computer', 
+            'Communication Expenditure', 'Miscellaneous Goods and Services Expenditure', 
+            'Clothing, Footwear and Other Wear Expenditure', 'Number of Airconditioner'
+        ]
 
-    wealth_categories = ['Low Wealth Score', 'Moderate Wealth Score', 'High Wealth Score']
+        wealth_categories = ['Low Wealth Score', 'Moderate Wealth Score', 'High Wealth Score']
+    # Factor 2: Household Amenities and Needs
+    elif factors == 'Household Amenities':
+        st.markdown(f'### Amenities Cluster Profile for Region: {map_metric}')
+        
+        # Columns for Household Amenities
+        factored_columns = ['Total Number of Family members',
+                            'Total Rice Expenditure',
+                            'Total number of family members employed',
+                            'Bread and Cereals Expenditure',
+                            'Members with age 5 - 17 years old']
+
+        # Cluster categories for Household Amenities
+        cluster_categories = ['Small Essential Households', 'Average-sized Households', 'Large Extended Households']
 
 
     # Create a dictionary to store the average values for each cluster
