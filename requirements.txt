@@ -2,3 +2,4 @@ streamlit
 geopandas
 plotly
 pandas
+dask

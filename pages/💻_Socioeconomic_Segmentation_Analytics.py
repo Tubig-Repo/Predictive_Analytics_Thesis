@@ -145,9 +145,9 @@ def select_year(factor , year):
         if year == "2012":
             df = pd.read_csv('ModelOutput/Household-Size-Basic-Needs-2012.csv')
         elif year == "2015":
-            df = pd.read_csv('ModelOutput/Household-Amenities-2015.csv')
+            df = pd.read_csv('ModelOutput/Household-Size-Basic-Needs-2015.csv')
         elif year == "2018":
-            df = pd.read_csv('ModelOutput/Household-Amenities-2018.csv')
+            df = pd.read_csv('ModelOutput/Household-Size-Basic-Needs-2018.csv')
         else:
             st.error("Invalid data year selected.")
             df = None
@@ -185,6 +185,7 @@ with st.sidebar:
     # Select a cluster to analyze
     unique_clusters = df['Clusters'].unique()
     selected_cluster = st.selectbox('Select Cluster', unique_clusters)
+    print(selected_cluster)
     clustered_data = df[df['Clusters'] == selected_cluster]
     
 with open('GeoJSON/PHRegions.json', 'r') as f:
@@ -207,15 +208,15 @@ with col[0]:
             'Clothing, Footwear and Other Wear Expenditure', 'Number of Airconditioner'
         ]
 
-        cluster_categories = ['Low Wealth Score', 'Moderate Wealth Score', 'High Wealth Score']
+        cluster_categories = ['Low Wealth', 'Moderate Wealth', 'High Wealth']
         category_column_mapping = {
-            'Low Wealth Score': 'Low Wealth',
-            'Moderate Wealth Score': 'Moderate Wealth',
-            'High Wealth Score': 'High Wealth'
+            'Low Wealth': 'Low Wealth',
+            'Moderate Wealth': 'Moderate Wealth',
+            'High Wealth': 'High Wealth'
         }
     # Factor 2: Household Amenities and Needs
     elif factors == 'Household Amenities':
-        st.markdown(f'### Household Needs & Amenities Cluster Profile {map_metric}')
+        st.markdown(f'### Household Needs & Amenities Cluster Profile: {map_metric}')
         
         # Columns for Household Amenities
         factored_columns = ['Total Number of Family members',
@@ -238,6 +239,8 @@ with col[0]:
         cluster_categories = []
         category_column_mapping = {}
         cluster_key = 'Clusters'
+        
+    region_data = df[df['Standardized Region Name'] == map_metric]
 
     # Create a dictionary to store the average values for each cluster
     cluster_averages = {}# Loop through each cluster to calculate the average for 'Total Household Income'
@@ -245,18 +248,14 @@ with col[0]:
     # Loop through each cluster category to calculate the average for indicators
     for cluster_category in cluster_categories:
         # Filter the data for the current cluster category
-        if factors == 'Socioeconomic Status and Wealth':
-            # For wealth status, use the score columns
-            cluster_data = df[df[cluster_category] == 1]
-        else:
-            # For amenities, filter by cluster name
-            cluster_data = df[df['Clusters'] == cluster_category]
-        
+        # For amenities, filter by cluster name
+        cluster_data = region_data[region_data['Clusters'] == cluster_category]
         # Calculate the average for the indicators
         average_values = cluster_data[factored_columns].mean()
-        
+
         # Store the result in the dictionary with the category as key
         cluster_averages[cluster_category] = average_values
+
 
     # Convert the dictionary into a DataFrame for display
     cluster_averages_df = pd.DataFrame(cluster_averages)
@@ -274,7 +273,6 @@ with col[0]:
     ## Display Cluster Distribution
     
     # Filter the data by the selected region
-    region_data = df[df['Standardized Region Name'] == map_metric]
 
     # Count the number of regions in each cluster
     cluster_counts = region_data['Clusters'].value_counts().reset_index()
@@ -288,9 +286,9 @@ with col[1]:
     choropleth_fig = visualization.socioeconomic_choropleth(
         df=df,
         geo_data=geo_data,
-        factors=factors,
         selected_cluster=selected_cluster,
-        selected_theme=selected_color_theme
+        selected_theme=selected_color_theme,
+        factors=factors
     )
     st.plotly_chart(choropleth_fig, use_container_width=True)
 with col[2]:

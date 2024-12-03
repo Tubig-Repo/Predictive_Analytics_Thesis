@@ -150,7 +150,7 @@ def plot_philippine_map(data, geojson_data):
   
     fig = px.choropleth_mapbox(data,
                               geojson=geojson_data,
-                              locations='Region',
+                              locations='Region Name',
                               featureidkey="properties.name",
                               color='Total Household Income',
                               color_continuous_scale="Reds",                              
@@ -173,7 +173,7 @@ def fies_barchart(data):
     fig = px.bar(
         data,
         x='Total Household Income',
-        y='Region',
+        y='Region Name',
         orientation='h',
         title='Top Regions',
         color_discrete_sequence=['#FF8080']    
@@ -191,7 +191,7 @@ def fies_barchart(data):
     return fig
 
 def fies_piechart(data):
-    income_sources = data['Main Source of Income'].value_counts().to_dict()
+    income_sources = data['Major Grouping of Main Source of Income'].value_counts().to_dict()
 
     fig = px.pie(
         values=list(income_sources.values()),
@@ -240,46 +240,41 @@ def create_choropleth(df, color_column, geo_data, selected_theme):
     )
     
     return fig
-
-def socioeconomic_choropleth(df, geo_data, factors, selected_cluster, selected_theme): 
-
-    factor_score_mapping = {
-        'Socioeconomic Status and Wealth': {
-            'Low Wealth': 'Low Wealth Score',
-            'Moderate Wealth': 'Moderate Wealth Score',
-            'High Wealth': 'High Wealth Score'
-        },
-        'Household Amenities': {
-            'Small Essential Households': 'Small Essential Score',
+# Socioeconomic and Household Mapping
+def socioeconomic_choropleth(df, geo_data, selected_cluster, selected_theme,factors): 
+    print("Selected Cluster:", selected_cluster)
+    print("Available Columns:", list(df.columns))
+    
+    # Determine the wealth score column based on the selected cluster
+    if factors == 'Socioeconomic Status and Wealth':
+        score_column = f"{selected_cluster} Score"
+    elif factors == 'Household Amenities':
+        cluster_mapping = {
             'Average-sized Households': 'Average-sized Score',
+            'Small Essential Households': 'Small Essential Score',
             'Large Extended Households': 'Large Extended Score'
         }
-    }
+        
+        score_column = cluster_mapping[selected_cluster]
 
-    if factors not in factor_score_mapping:
-        raise ValueError(f"Invalid factor type: {factors}")
-
-    color_columns = factor_score_mapping[factors]
-
-    # Get the column for the selected cluster
-    wealth_score_column = color_columns.get(selected_cluster)
-    if wealth_score_column is None:
-        raise ValueError(f"No color column found for cluster: {selected_cluster}")
-
+    
+    # Verify the column exists
+    if score_column not in df.columns:
+        raise ValueError(f"Column '{score_column}' not found in DataFrame. Available columns are: {list(df.columns)}")
     # Create the choropleth map
     fig = px.choropleth_mapbox(
         df,
         geojson=geo_data,
         locations="Standardized Region Name",
         featureidkey="properties.name",  # Matches GeoJSON property for regions
-        color=wealth_score_column,  # Use the selected wealth score
+        color=score_column,  # Use the selected wealth score
         color_continuous_scale=selected_theme,
-        range_color=(df[wealth_score_column].min(), df[wealth_score_column].max()),
+        range_color=(0, 1),  # Assuming wealth scores are normalized between 0 and 1
         mapbox_style="carto-positron",
         zoom=5,
         center={"lat": 12.8797, "lon": 121.7740},
         opacity=0.6,
-        labels={wealth_score_column: f"{selected_cluster} Score"},
+        labels={score_column: f"{selected_cluster} Score"},
         title=f"{selected_cluster} Score by Region"
     )
 
@@ -292,84 +287,8 @@ def socioeconomic_choropleth(df, geo_data, factors, selected_cluster, selected_t
     # Layout adjustments
     fig.update_layout(
         margin={"r": 0, "t": 30, "l": 0, "b": 0},
-        width=460,
+        width=460, 
         height=700
     )
-
+    
     return fig
-    
-    """
-    Create a choropleth map for different factor types
-    
-    Parameters:
-    - df: DataFrame with clustering results
-    - geo_data: GeoJSON data for Philippines regions
-    - factors: Current selected factor type
-    - selected_cluster: Selected cluster to visualize
-    - selected_theme: Color theme for the map
-    
-    Returns:
-    Plotly figure object
-    """
-    color_columns = {}
-    title = ""
-    
-    # Determine the color column based on the factor type
-    if factors == 'Socioeconomic Status and Wealth':
-        color_columns = {
-            'Low Wealth': 'Low Wealth Score',
-            'Moderate Wealth': 'Moderate Wealth Score',
-            'High Wealth': 'High Wealth Score'
-        }
-        title = f"Wealth Cluster Distribution: {selected_cluster}"
-    
-    elif factors == 'Household Amenities':
-        color_columns = {
-            'Basic Amenities Households': 'Basic Amenities Households Score',
-            'Moderate Amenities Households': 'Moderate Amenities Households Score',
-            'Advanced Amenities Households': 'Advanced Amenities Households Score'
-        }
-        title = f"Household Amenities Cluster Distribution: {selected_cluster}"
-    
-    else:
-        raise ValueError("Invalid factor type")
-    
-    # Get the appropriate color column for the selected cluster
- 
-    color_column = color_columns.get(selected_cluster)
-    print(color_column)
-    if color_column is None:
-        raise ValueError(f"No color column found for cluster: {selected_cluster}")
-    
-    # Create the choropleth map
-    choropleth_fig = px.choropleth(
-        df,
-        geojson=geo_data,
-        locations='Standardized Region Name',
-        locationmode='geojson-id',
-        color=color_column,
-        color_continuous_scale=selected_theme,
-        title=title,
-        hover_name='Standardized Region Name',
-        hover_data={
-            'Standardized Region Name': True,
-            color_column: ':.2f',
-            'Clusters': True
-        }
-    )
-    
-    # Customize the layout
-    choropleth_fig.update_geos(
-        fitbounds="locations", 
-        visible=False,
-        projection_type="mercator"
-    )
-    
-    choropleth_fig.update_layout(
-        title_x=0.5,
-        height=600,
-        margin={"r":0,"t":50,"l":0,"b":0}
-    )
-    
-    return choropleth_fig
-
