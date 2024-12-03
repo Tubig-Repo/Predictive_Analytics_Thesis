@@ -68,12 +68,8 @@ def get_map_metric_options(dataset):
             'Actual_Housing_Water_Expenditure', 
             'Business_Potential_Score'
         ],
-        'Bar/Clubs Business': [
-            'Average_Alcoholic_Beverages_Expenditure', 
-            'Business_Potential_Score'
-        ],
         'Medical Care Expenditure': [
-            'Actual_Medical_Expenditure', 
+            'Actual_Medical_Care_Expenditure', 
             'Business_Potential_Score'
         ]
     }
@@ -85,7 +81,6 @@ with st.sidebar:
         ('🥩', 'Meat Processing/Distribution'),
         ('🍽️', 'Restaurant Business'),
         ('🏠', 'Home Improvement/Construction'),
-        ('🍺', 'Bar/Clubs Business'),
         ('🏥', 'Medical Care Expenditure'),
     ]
 
@@ -118,15 +113,13 @@ with st.sidebar:
 def load_dataset(dataset):
     try:
         if dataset == 'Meat Processing/Distribution':
-            return pd.read_csv('ModelOutput/meat_scores.csv')
+            return pd.read_csv('ModelOutput/meat-scores-2018.csv')
         elif dataset == 'Restaurant Business':
-            return pd.read_csv('ModelOutput/restaurant-scores.csv')
+            return pd.read_csv('ModelOutput/restaurant-scores-2018.csv')
         elif dataset == 'Home Improvement/Construction':
-             return pd.read_csv('ModelOutput/construction-scores.csv')
-        elif dataset == 'Bar/Clubs Business':
-            return pd.read_csv('ModelOutput/bar-scores.csv')
+             return pd.read_csv('ModelOutput/construction-scores-2018.csv')
         elif dataset == 'Medical Care Expenditure':
-            return pd.read_csv('ModelOutput/medical_scores.csv')
+            return pd.read_csv('ModelOutput/healthcare-scores-2018.csv')
         else:
             st.error("Dataset not found")
             return None
@@ -161,14 +154,9 @@ def get_expenditure_columns(dataset):
             'predicted_column': 'Actual_Housing_Water_Expenditure',
             'label': 'Construction Expenditure'
         },
-        'Bar/Clubs Business': {
-            'actual_column': 'Average_Alcoholic_Beverages_Expenditure',
-            'predicted_column': 'Predicted_Alcoholic_Beverages_Expenditure',
-            'label': 'Bar/Clubs Expenditure'
-        },
         'Medical Care Expenditure': {
-            'actual_column': 'Actual_Medical_Expenditure',
-            'predicted_column': 'Predicted_Medical_Expenditure',
+            'actual_column': 'Actual_Medical_Care_Expenditure',
+            'predicted_column': 'Predicted_Medical_Care_Expenditure',
             'label': 'Medical Expenditure'
         }
     }
@@ -234,16 +222,8 @@ def get_choropleth_metric(dataset, map_metric):
             'Actual_Restaurant_Expenditure': 'Restaurant Expenditure',
             'Business_Potential_Score': 'Business Potential'
         },
-        'Home Improvement/Construction': {
-            'Actual_Construction_Expenditure': 'Construction Expenditure',
-            'Business_Potential_Score': 'Business Potential'
-        },
-        'Bar/Clubs Business': {
-            'Average_Alcoholic_Beverages_Expenditure': 'Bar/Clubs Expenditure',
-            'Business_Potential_Score': 'Business Potential'
-        },
         'Medical Care Expenditure': {
-            'Actual_Medical_Expenditure': 'Medical Expenditure',
+            'Actual_Medical_Care_Expenditure': 'Medical Expenditure',
             'Business_Potential_Score': 'Business Potential'
         },
         'Home Improvement/Construction': {

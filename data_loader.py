@@ -39,7 +39,7 @@ def load_population(selected_year , option_level , option_island):
             luzon_df[selected_year] = luzon_df[selected_year].str.replace(',', '').astype(float)
             
             # Visayas cleaning
-            visayas_population[selected_year] = visayas_population[selected_year].str.replace(',', '').astype(int)
+            visayas_population[selected_year] = visayas_population[selected_year].astype(str).str.replace(',', '').astype(float)
             
             # Mindanao cleaning (assuming no special cleaning needed)
             mindanao_df = pd.DataFrame(mindanao_population)
@@ -217,7 +217,7 @@ def load_original_fies_data():
 #     else:  # "All"
 #         return data
 
-def filter_data(data, island='All', household_type='All', tenure_status='All', building_type='All', household_head_job='All'):
+def filter_data(data, island='All', household_type='All', household_head_job='All'):
     """
     Filter the data based on the provided parameters.
     
@@ -251,24 +251,19 @@ def filter_data(data, island='All', household_type='All', tenure_status='All', b
     if household_type != "All":
         data = data[data['Type of Household'] == household_type]
 
-    # Filter by tenure status
-    if tenure_status != "All":
-        data = data[data['Tenure Status'] == tenure_status]
-
-    # Filter by building type
-    if building_type != "All":
-        data = data[data['Type of Building/House'] == building_type]
-
     # Filter by household head job/business
     if household_head_job != "All":
         data = data[data['Household Head Job or Business Indicator'] == household_head_job]
-
+     # Check if any data remains after filtering
+    if len(data) == 0:
+        # Return a DataFrame with the same columns but no rows
+        return data.head(0)
     return data
 # Load Average Values
-def load_average_values(island,type_of_household,tenure_status,type_of_building,household_head_indicator):
+def load_average_values(island,type_of_household,household_head_indicator):
     
     df = load_original_fies_data()
-    filtered_data = filter_data(df, island=island, household_type=type_of_household,tenure_status=tenure_status,building_type=type_of_building,household_head_job=household_head_indicator)
+    filtered_data = filter_data(df, island=island, household_type=type_of_household,household_head_job=household_head_indicator)
     avg_household_age = filtered_data['Household Head Age'].mean().compute()
     avg_household_inc = filtered_data['Total Household Income'].mean().compute()
     avg_household_working = filtered_data['Total number of family members employed for pay'].mean().compute()
@@ -280,10 +275,10 @@ def load_average_values(island,type_of_household,tenure_status,type_of_building,
     )
 
 # FIES Breakdown 
-def load_expenditure_data(island, type_of_household,tenure_status,type_of_building,household_head_indicator): 
+def load_expenditure_data(island, type_of_household,household_head_indicator): 
     
     df = load_original_fies_data()
-    filtered_data = filter_data(df, island=island, household_type=type_of_household,tenure_status=tenure_status,building_type=type_of_building,household_head_job=household_head_indicator)
+    filtered_data = filter_data(df, island=island, household_type=type_of_household,household_head_job=household_head_indicator)
 
     df_expenditure = filtered_data[['Total Food Expenditure','Total Rice Expenditure', 'Meat Expenditure' , 'Bread and Cereals Expenditure', 'Fruit Expenditure','Vegetables Expenditure',  'Restaurant and hotels Expenditure','Alcoholic Beverages Expenditure', 'Tobacco Expenditure',  'Clothing, Footwear and Other Wear Expenditure',  'Housing and water Expenditure',   'Medical Care Expenditure', 'Communication Expenditure', 'Education Expenditure',  'Miscellaneous Goods and Services Expenditure', 'Crop Farming and Gardening expenses', 'Total Fish and  marine products Expenditure','Transportation Expenditure', 'Special Occasions Expenditure']]
 

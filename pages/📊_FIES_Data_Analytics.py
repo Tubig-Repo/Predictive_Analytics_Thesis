@@ -18,7 +18,7 @@ st.title("FIES Data Analytics")
 
 # Filter Options 
 st.subheader("Filter Options")
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3 = st.columns(3)
 
 # Major Island
 with col1:
@@ -26,34 +26,11 @@ with col1:
 # Type of Household  
 with col2:
     type_of_household = st.radio("Type of Household", options=["All", "Single Family", "Two or More Nonrelated Persons/Members", "Extended Family"])
-
-# Tenure Status
-with col3:
-    tenure_status = st.selectbox("Tenure Status", options=[  "All", 
-                                                            "Rent-free house and lot with consent of owner",
-                                                            "Own or owner-like possession of house and lot",
-                                                            "Own house, rent-free lot with consent of owner",
-                                                            "Rent house/room including lot",
-                                                            "Own house, rent-free lot without consent of owner",
-                                                            "Own house, rent lot",
-                                                            "Rent-free house and lot without consent of owner",
-                                                            "Not Applicable"])
-
-# Type of Building/House
-with col4:
-    type_of_building = st.selectbox("Type of Building/House", options=[ "All", 
-                                                                        "Single house", 
-                                                                        "Multi-unit residential", 
-                                                                        "Duplex", 
-                                                                        "Other building unit (e.g. cave, boat)", 
-                                                                        "Institutional living quarter", 
-                                                                        "Unknown", 
-                                                                        "Commercial/industrial/agricultural building"])
 # Household Head Job or Business Indicator
-with col5:
+with col3:
     household_head_indicator = st.radio("Household Head Job or Business", options=["All", "No Job/Business", "With Job/Business"])
     
-get_avg_values = data_loader.load_average_values(major_island, type_of_household=type_of_household, tenure_status=tenure_status,type_of_building=type_of_building,household_head_indicator=household_head_indicator)
+get_avg_values = data_loader.load_average_values(major_island, type_of_household=type_of_household, household_head_indicator=household_head_indicator)
 # FIES Average Values
 st.subheader("Key Metrics")
 col1, col2, col3 = st.columns(3)
@@ -61,9 +38,14 @@ col1.metric("Avg. Household Head Age", round(get_avg_values.avg_age, 2))
 col2.metric("Avg. Household Income", f"₱{round(get_avg_values.avg_household_inc, 2):,.0f}")
 col3.metric("Avg. Number of Family Members Employed", round(get_avg_values.avg_working_mem, 2))
 st.subheader('FIES Expenditure Breakdown')
-expenditure = data_loader.load_expenditure_data(major_island, type_of_household=type_of_household,tenure_status=tenure_status,type_of_building=type_of_building,household_head_indicator=household_head_indicator)
-fig1 = visualization.plot_expenditure_breakdown(expenditure)
-st.plotly_chart(fig1)
+expenditure = data_loader.load_expenditure_data(major_island, type_of_household=type_of_household,household_head_indicator=household_head_indicator)
+
+# Handle no expenditure data
+if expenditure is not None:
+    fig1 = visualization.plot_expenditure_breakdown(expenditure)
+    st.plotly_chart(fig1)
+else:
+    st.warning("No expenditure data available for the selected filters.")
 
 # Mapbox and Pie Chart, Bar Chart (Top Regions)
 
