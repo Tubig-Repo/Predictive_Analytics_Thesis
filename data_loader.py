@@ -298,4 +298,6 @@ def get_ml_output():
     df = pd.read_csv('ModelOutput/Standardized FIES Dataset.csv')
     
     return df
-    
+
+def testFunction():
+    return ""
