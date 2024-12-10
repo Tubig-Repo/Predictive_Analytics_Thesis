@@ -1,1 +1,2 @@
 ModelOutput/Socioeconomic-Segmentation-2018.csv filter=lfs diff=lfs merge=lfs -text
+ModelOutput/Socioeconomic-Segmentation-2018 filter=lfs diff=lfs merge=lfs -text
